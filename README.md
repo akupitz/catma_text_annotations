@@ -1,1 +1,1 @@
-# parse_catma_text_annotations
+# Parse text annotations from CATMA tar.gz's
