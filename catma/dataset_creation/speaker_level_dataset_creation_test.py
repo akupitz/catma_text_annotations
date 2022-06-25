@@ -3,6 +3,9 @@ import os
 from catma.archives_unpacking import CatmaUnpacking
 from catma.dataset_creation.speaker_level_dataset_creation import SpeakerLevelDatasetCreator
 from configuration.general_config import ITAY_CATMA_CONFIG
+from configuration.df_columns import SPEAKER_NAME_START_CHAR_COLUMN, SPEAKER_TEXT_START_CHAR_COLUMN, \
+    SPEAKER_TEXT_END_CHAR_COLUMN, SPEAKER_NAME_COLUMN, SPEAKER_TEXT_COLUMN, BEFORE_SPEAKER_TEXT_CONTEXT_COLUMN, \
+    AFTER_SPEAKER_TEXT_CONTEXT_COLUMN, CLEAN_SPEAKER_TEXT_COLUMN, LABEL_TEXT_COLUMN, CLEAN_LABEL_TEXT_COLUMN
 
 
 def test_speaker_extraction():
@@ -17,16 +20,15 @@ def test_speaker_extraction():
     speaker_level_dataset_creator = SpeakerLevelDatasetCreator(
         remove_new_line_and_tab=ITAY_CATMA_CONFIG.remove_new_line_and_tab)
     temp_df = speaker_level_dataset_creator.get_df_from_protocol_dir(protocol_dir)
-    row_to_test = temp_df[temp_df["speaker_name_start_char"] == 950]
-    assert row_to_test["speaker_text_start_char"].iloc[0] == 983
-    assert row_to_test["speaker_end_char"].iloc[0] == 1025
-    assert " ".join(row_to_test["speaker_name"].iloc[0].split()) == "אורלי לוי אבקסיס (ישראל ביתנו):"
-    assert row_to_test["speaker_name_start_char"].iloc[0] == 950
-    row_to_test = temp_df[temp_df["speaker_name_start_char"] == 5291]
-    assert row_to_test["speaker_text_start_char"].iloc[0] == 5308
-    assert row_to_test["speaker_end_char"].iloc[0] == 5332
-    assert " ".join(row_to_test["speaker_name"].iloc[0].split()) == 'היו"ר משה גפני:'
-    assert " ".join(row_to_test["speaker_text"].iloc[0].split()) == 'זה לא יעמוד בבג"ץ.'
+    row_to_test = temp_df[temp_df[SPEAKER_NAME_START_CHAR_COLUMN] == 950]
+    assert row_to_test[SPEAKER_TEXT_START_CHAR_COLUMN].iloc[0] == 983
+    assert row_to_test[SPEAKER_TEXT_END_CHAR_COLUMN].iloc[0] == 1025
+    assert " ".join(row_to_test[SPEAKER_NAME_COLUMN].iloc[0].split()) == "אורלי לוי אבקסיס (ישראל ביתנו):"
+    row_to_test = temp_df[temp_df[SPEAKER_NAME_START_CHAR_COLUMN] == 5291]
+    assert row_to_test[SPEAKER_TEXT_START_CHAR_COLUMN].iloc[0] == 5308
+    assert row_to_test[SPEAKER_TEXT_END_CHAR_COLUMN].iloc[0] == 5332
+    assert " ".join(row_to_test[SPEAKER_NAME_COLUMN].iloc[0].split()) == 'היו"ר משה גפני:'
+    assert " ".join(row_to_test[SPEAKER_TEXT_COLUMN].iloc[0].split()) == 'זה לא יעמוד בבג"ץ.'
     print("VVV\nPassed speaker extraction test")
 
 

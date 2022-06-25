@@ -1,7 +1,55 @@
-# todo: do it like speaker level dataset creation
-#
-#
-# class SentenceLevelDatasetCreator(GenericDatasetCreator):
+import os
+from typing import List, Optional
+
+import pandas as pd
+
+from catma.dataset_creation.generic_dataset_creation import GenericDatasetCreator
+from catma.validations import get_single_validated_file_lines, get_single_validated_file_content
+from configuration.df_columns import FILE_COLUMN
+from configuration.general_config import CATMA_XML_ANNOTATION_DIR
+
+
+class SentenceLevelDatasetCreator(GenericDatasetCreator):
+    def get_df_from_protocol_dir(self, protocol_dir: str) -> Optional[pd.DataFrame]:
+        print(
+            '''Important: check if you need to remove new line and tab or not (depends on dataset).
+            you can change it in the init of CatmaDatasetCreation.
+            You can validate it using CATMA analyze with some tags to check.''')
+        txt_data_lines = get_single_validated_file_lines(file_directory_path=protocol_dir,
+                                                         suffix="txt")
+        txt_content = get_single_validated_file_content(file_directory_path=protocol_dir,
+                                                        suffix="txt")
+        xml_content = get_single_validated_file_content(
+            file_directory_path=os.path.join(protocol_dir, CATMA_XML_ANNOTATION_DIR), suffix="xml")
+
+        sentence_metadata_before_annotations_df = self._get_speaker_metadata_df(txt_data_lines)
+
+        only_annotation_df = self._get_annotation_df_from_xml(xml_content)
+
+        annotations_with_speaker_metadata_df = self._merge_speaker_metadata_and_annotation_df(
+            speaker_metadata_before_annotations_df,
+            only_annotation_df)
+
+        annotations_with_speaker_metadata_df[FILE_COLUMN] = os.path.basename(protocol_dir)
+        final_df = self._add_text_based_columns(annotations_with_speaker_metadata_df, txt_content)
+        return final_df
+
+
+    # def get_df_from_protocol_dirs(self, protocol_dirs: List[str]) -> pd.DataFrame:
+    #     protocol_dfs_to_concatenate = []
+    #     for protocol_dir in protocol_dirs:
+    #         print(f"Getting sentence level df from protocol dir: {protocol_dir}")
+    #         protocol_matching_df = self.get_df_from_protocol_dir(protocol_dir)
+    #         protocol_dfs_to_concatenate.append(protocol_matching_df)
+    #     concatenated_protocols_df = pd.concat(protocol_dfs_to_concatenate, ignore_index=True)
+    #     concatenated_protocols_df = concatenated_protocols_df.dropna(subset=[SPEAKER_TEXT_COLUMN])
+    #     # todo: we can add better filterations in here
+    #     concatenated_protocols_df = concatenated_protocols_df[
+    #         concatenated_protocols_df[SPEAKER_TEXT_COLUMN].str.len() > 0]
+    #     concatenated_protocols_df[LABEL_COLUMN].replace(LABEL_REPLACEMENTS_MAPPING, inplace=True)
+    #     concatenated_protocols_df = concatenated_protocols_df[
+    #         ~concatenated_protocols_df[LABEL_COLUMN].isin(LABELS_TO_DROP)]
+    #     return concatenated_protocols_df
 #
 #     def get_df_from_protocol_dirs(self, protocol_dirs: List[str]) -> pd.DataFrame:
 #         protocol_dfs_to_concatenate = []

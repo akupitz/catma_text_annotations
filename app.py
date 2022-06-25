@@ -3,9 +3,6 @@ from catma.archives_unpacking import CatmaUnpacking
 from catma.dataset_creation.speaker_level_dataset_creation import SpeakerLevelDatasetCreator
 from configuration.general_config import ITAY_CATMA_CONFIG
 
-# INPUT_CATMA_TAR_GZS_DATA_PATH, UNPACKED_PROTOCOL_ARCHIVES_PATH, \
-#     OUTPUT_SENTENCE_LEVEL_DATASET_TSV_PATH, OUTPUT_SPEAKER_LEVEL_DATASET_TSV_PATH
-
 if __name__ == "__main__":
     """
     In order to get the initial data go to: CATMA -> project -> in Documents & Annotations select files one by one and Export Documents & Collections 
@@ -26,4 +23,3 @@ if __name__ == "__main__":
     # todo: remove unnecessary text from documents
     # todo: when doing explode to split text to sentences i don't update start_char and end_char, so do it
     # todo: add tests
-

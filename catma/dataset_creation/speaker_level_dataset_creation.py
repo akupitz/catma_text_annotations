@@ -21,7 +21,7 @@ from configuration.df_columns import LABEL_COLUMN, LABEL_CATMA_ID_COLUMN, TEXT_S
     SPEAKER_TEXT_COLUMN, SPEAKER_TEXT_END_CHAR_COLUMN, LABEL_TEXT_COLUMN, CLEAN_SPEAKER_TEXT_COLUMN, \
     CLEAN_LABEL_TEXT_COLUMN, BEFORE_SPEAKER_TEXT_CONTEXT_COLUMN, AFTER_SPEAKER_TEXT_CONTEXT_COLUMN
 from configuration.general_config import ITAY_CATMA_CONFIG, CATMA_XML_ANNOTATION_DIR, NOT_SPEAKER_START_PHRASES, \
-    BEFORE_TEXT_CONTEXT_SIZE, AFTER_TEXT_CONTEXT_SIZE
+    BEFORE_TEXT_CONTEXT_SIZE, AFTER_TEXT_CONTEXT_SIZE, LABEL_REPLACEMENTS_MAPPING, LABELS_TO_DROP
 
 
 @dataclass
@@ -50,9 +50,13 @@ class SpeakerLevelDatasetCreator(GenericDatasetCreator):
             protocol_matching_df = self.get_df_from_protocol_dir(protocol_dir)
             protocol_dfs_to_concatenate.append(protocol_matching_df)
         concatenated_protocols_df = pd.concat(protocol_dfs_to_concatenate, ignore_index=True)
-        concatenated_protocols_df = concatenated_protocols_df.dropna(subset=[CLEAN_SPEAKER_TEXT_COLUMN])
+        concatenated_protocols_df = concatenated_protocols_df.dropna(subset=[SPEAKER_TEXT_COLUMN])
+        # todo: we can add better filterations in here
         concatenated_protocols_df = concatenated_protocols_df[
-                concatenated_protocols_df[CLEAN_SPEAKER_TEXT_COLUMN].str.len() > 0]
+                concatenated_protocols_df[SPEAKER_TEXT_COLUMN].str.len() > 0]
+        concatenated_protocols_df[LABEL_COLUMN].replace(LABEL_REPLACEMENTS_MAPPING, inplace=True)
+        concatenated_protocols_df = concatenated_protocols_df[
+                    ~concatenated_protocols_df[LABEL_COLUMN].isin(LABELS_TO_DROP)]
         return concatenated_protocols_df
 
     def get_df_from_protocol_dir(self, protocol_dir: str) -> Optional[pd.DataFrame]:
@@ -178,12 +182,12 @@ class SpeakerLevelDatasetCreator(GenericDatasetCreator):
             lambda row: txt_content[row[SPEAKER_NAME_START_CHAR_COLUMN]:row[SPEAKER_TEXT_START_CHAR_COLUMN]], axis=1)
         final_df[SPEAKER_TEXT_COLUMN] = final_df.apply(
             lambda row: txt_content[row[SPEAKER_TEXT_START_CHAR_COLUMN]:row[SPEAKER_TEXT_END_CHAR_COLUMN]], axis=1)
-        final_df[CLEAN_SPEAKER_TEXT_COLUMN] = final_df.apply(
-            lambda row: " ".join(row[SPEAKER_TEXT_COLUMN]), axis=1)
+        # final_df[CLEAN_SPEAKER_TEXT_COLUMN] = final_df.apply(
+        #     lambda row: " ".join(row[SPEAKER_TEXT_COLUMN].split()), axis=1)
         final_df[LABEL_TEXT_COLUMN] = final_df.apply(
             lambda row: txt_content[row[LABEL_START_CHAR_COLUMN]:row[LABEL_END_CHAR_COLUMN]], axis=1)
-        final_df[CLEAN_LABEL_TEXT_COLUMN] = final_df.apply(
-            lambda row: " ".join(row[LABEL_TEXT_COLUMN]), axis=1)
+        # final_df[CLEAN_LABEL_TEXT_COLUMN] = final_df.apply(
+        #     lambda row: " ".join(row[LABEL_TEXT_COLUMN].split()), axis=1)
         # todo: if we want context we can use it:
         # final_df[BEFORE_SPEAKER_TEXT_CONTEXT_COLUMN] = final_df.apply(
         #     lambda row: txt_content[row[SPEAKER_TEXT_START_CHAR_COLUMN] + BEFORE_TEXT_CONTEXT_SIZE:row[
