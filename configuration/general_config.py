@@ -36,6 +36,13 @@ LABELS_TO_DROP = ["Doubt"]
 PROTOCOL_DIRS_WITHOUT_SPEAKERS = ["9.7.18", "11.7.18", "4.7.18"]  # based on check_that_all_have_speakers.ipynb
 PROTOCOL_DIRS_THAT_LOOK_WEIRD = ["5.7.18", "פרוטוקול_465_ריק"]  # based on check_that_all_have_speakers.ipynb
 
+NOT_SPEAKER_START_PHRASES = ['נכחו', 'סדר היום', 'חברי הכנסת', 'מוזמנים', 'חברי הוועדה', 'משרד האוצר', 'משרד הפנים',
+                             'נוכחים',
+                             'ייעוץ משפטי', 'מנהל הוועדה', 'רישום פרלמנטרי', 'מנהלת הוועדה', 'מנהל/ת הוועדה',
+                             'קצרנית פרלמנטרית', 'רשמה וערכה', 'רכזת הוועדה', 'רשמת פרלמנטרית', 'נציבות המים',
+                             'משרד התשתיות הלאומיות', 'המשרד לאיכות הסביבה', 'הרשות לשירותים ציבוריים מים וביוב',
+                             'אדם טבע ודין']
+
 START_CHAR_END_CHAR_EXTRACTION_REGEX = re.compile("[\w\W]*char=(\d+),(\d+)")
 COMMITTEE_REGEX = re.compile("ועדת" + "[\u0590-\u05FF ]*")
 PROTOCOL_NUMBER_REGEX = re.compile("פרוטוקול מס'" + "[ ]*" + "[\d]+")
