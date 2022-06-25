@@ -1,5 +1,6 @@
 import glob
 import os
+from typing import List
 
 
 def get_single_validated_file_content(file_directory_path: str, suffix: str = "xml") -> str:
@@ -7,6 +8,13 @@ def get_single_validated_file_content(file_directory_path: str, suffix: str = "x
     with open(suffix_single_validated_file_path) as file:
         file_content = file.read()
     return file_content
+
+
+def get_single_validated_file_lines(file_directory_path: str, suffix: str = "xml") -> List[str]:
+    suffix_single_validated_file_path = get_single_validated_file_path(file_directory_path, suffix)
+    with open(suffix_single_validated_file_path) as file:
+        file_lines = file.readlines()
+    return file_lines
 
 
 def get_single_validated_file_path(file_directory_path: str, suffix: str = "xml") -> str:

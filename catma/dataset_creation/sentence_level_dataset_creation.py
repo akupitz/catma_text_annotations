@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from typing import List, Optional
 
+from catma.dataset_creation.generic_dataset_creation import GenericDatasetCreator
 from catma.validations import get_single_validated_file_content
 from configuration.general_config import LABEL_REPLACEMENTS_MAPPING, LABELS_TO_DROP, CATMA_XML_ANNOTATION_DIR, \
     AFTER_TEXT_CONTEXT_SIZE, BEFORE_TEXT_CONTEXT_SIZE, START_CHAR_END_CHAR_EXTRACTION_REGEX, COMMITTEE_REGEX, \
@@ -119,15 +120,13 @@ def create_not_tagged_start_char_end_char(bs_text_data):
     return not_tagged_start_char_end_char
 
 
-class CatmaDatasetCreation:
-    def __init__(self, remove_new_line_and_tab: bool = False):
-        self.remove_new_line_and_tab = remove_new_line_and_tab
+class SentenceLevelDatasetCreator(GenericDatasetCreator):
 
-    def get_sentence_level_df_from_protocol_dirs(self, protocol_dirs: List[str]) -> pd.DataFrame:
+    def get_df_from_protocol_dirs(self, protocol_dirs: List[str]) -> pd.DataFrame:
         protocol_dfs_to_concatenate = []
         for protocol_dir in protocol_dirs:
             print(f"Getting sentence level df from protocol dir: {protocol_dir}")
-            protocol_matching_df = self.get_sentence_level_df_from_protocol_dir(protocol_dir)
+            protocol_matching_df = self.get_df_from_protocol_dir(protocol_dir)
             protocol_dfs_to_concatenate.append(protocol_matching_df)
         concatenated_protocols_df = pd.concat(protocol_dfs_to_concatenate, ignore_index=True)
         concatenated_protocols_df = concatenated_protocols_df.drop_duplicates(ignore_index=True)
@@ -149,7 +148,7 @@ class CatmaDatasetCreation:
         concatenated_protocols_df = concatenated_protocols_df.dropna(subset=[CLEAN_TEXT_COLUMN])
         return concatenated_protocols_df
 
-    def get_sentence_level_df_from_protocol_dir(self, protocol_dir: str) -> Optional[pd.DataFrame]:
+    def get_df_from_protocol_dir(self, protocol_dir: str) -> Optional[pd.DataFrame]:
 
         xml_data = get_single_validated_file_content(
             file_directory_path=os.path.join(protocol_dir, CATMA_XML_ANNOTATION_DIR),
