@@ -21,6 +21,7 @@ class CatmaConfig:
 
 
 DANIEL_CATMA_CONFIG = CatmaConfig(input_catma_tar_gzs_data_path="/home/amit/Desktop/TAU/thesis/daniel_catma_data")
+DANIEL_6_LABELS_CATMA_CONFIG = CatmaConfig(input_catma_tar_gzs_data_path="/home/amit/Desktop/TAU/thesis/daniel_6_labels_catma_data_April_23")
 ITAY_CATMA_CONFIG = CatmaConfig(input_catma_tar_gzs_data_path="/home/amit/Desktop/TAU/thesis/itay_catma_data")
 
 CONTEXT_SIZE = 100

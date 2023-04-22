@@ -51,7 +51,7 @@ class CatmaUnpacking:
         print(f"Protocol dirs without annotation for instance are: {protocol_dirs_without_annotation[:3]}")
         print(
             f"Protocol dirs with multiple annotations for instance are: {protocol_dirs_with_multiple_annotations[:3]}")
-        return protocol_dirs_with_one_annotation + protocol_dirs_with_multiple_annotations
+        return sorted(protocol_dirs_with_one_annotation + protocol_dirs_with_multiple_annotations)
 
     @staticmethod
     def _choose_longest_xml_path(xml_paths):

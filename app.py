@@ -1,14 +1,14 @@
 from catma.archives_unpacking import CatmaUnpacking
 # from catma.dataset_creation.sentence_level_dataset_creation import SentenceLevelDatasetCreator
 from catma.dataset_creation.speaker_level_dataset_creation import SpeakerLevelDatasetCreator
-from configuration.general_config import ITAY_CATMA_CONFIG
+from configuration.general_config import ITAY_CATMA_CONFIG, DANIEL_6_LABELS_CATMA_CONFIG
 
 if __name__ == "__main__":
     """
     In order to get the initial data go to: CATMA -> project -> in Documents & Annotations select files one by one and Export Documents & Collections 
     In order to validate it easily go to: CATMA -> analyze -> select document with annotation (important!!!) -> use KWIC -> select all
     """
-    catma_config = ITAY_CATMA_CONFIG
+    catma_config = DANIEL_6_LABELS_CATMA_CONFIG # ITAY_CATMA_CONFIG
     catma_unpacking = CatmaUnpacking(tar_gzs_dir=catma_config.input_catma_tar_gzs_data_path,
                                      unpacked_protocol_archives_dir=catma_config.unpacked_protocol_archives_path)
     catma_unpacking.unpack_tar_gz_files()

@@ -46,7 +46,13 @@ class SpeakerLevelDatasetCreator(GenericDatasetCreator):
     def get_df_from_protocol_dirs(self, protocol_dirs: List[str]) -> pd.DataFrame:
         protocol_dfs_to_concatenate = []
         for protocol_dir in protocol_dirs:
-            print(f"Getting sentence level df from protocol dir: {protocol_dir}")
+            print(f"\n\nGetting sentence level df from protocol dir: {protocol_dir}")
+            if protocol_dir in ['/home/amit/Desktop/TAU/thesis/daniel_6_labels_catma_data_April_23/unpacked_protocol_archives/13._חוק_לאום_1_13-03-18_(3)',
+                                '/home/amit/Desktop/TAU/thesis/daniel_6_labels_catma_data_April_23/unpacked_protocol_archives/1._חוק_לאום_1_26-07-17',
+                                '/home/amit/Desktop/TAU/thesis/daniel_6_labels_catma_data_April_23/unpacked_protocol_archives/17._חוק_לאום_2_12-07-18',
+                                '/home/amit/Desktop/TAU/thesis/daniel_6_labels_catma_data_April_23/unpacked_protocol_archives/12._חוק_לאום_1_13-03-18_(2)']:
+                print(f"Skipping protocol dir: {protocol_dir}")
+                continue
             protocol_matching_df = self.get_df_from_protocol_dir(protocol_dir)
             protocol_dfs_to_concatenate.append(protocol_matching_df)
         concatenated_protocols_df = pd.concat(protocol_dfs_to_concatenate, ignore_index=True)
@@ -72,27 +78,27 @@ class SpeakerLevelDatasetCreator(GenericDatasetCreator):
             file_directory_path=os.path.join(protocol_dir, CATMA_XML_ANNOTATION_DIR), suffix="xml")
 
         speaker_metadata_before_annotations_df = self._get_speaker_metadata_df(txt_data_lines)
-
         only_annotation_df = self._get_annotation_df_from_xml(xml_content)
-
         annotations_with_speaker_metadata_df = self._merge_speaker_metadata_and_annotation_df(
-            speaker_metadata_before_annotations_df,
-            only_annotation_df)
-
-        annotations_with_speaker_metadata_df[FILE_COLUMN] = os.path.basename(protocol_dir)
+            speaker_metadata_before_annotations_df, only_annotation_df)
+        try:
+            annotations_with_speaker_metadata_df[FILE_COLUMN] = os.path.basename(protocol_dir)
+        except Exception as e:
+            print (f"Error in file: {protocol_dir}")
+            raise NotImplementedError
         final_df = self._add_text_based_columns(annotations_with_speaker_metadata_df, txt_content)
         return final_df
 
     def _get_speaker_metadata_df(self, text_lines: List[str]) -> Optional[pd.DataFrame]:
-        last_end_char = 0
+        last_end_char = 0  # todo: error here
         first_speaker_in_text = True
         latest_speaker_name_start_char, latest_speaker_text_start_char = None, None
         speakers_metadata = []
         for i, text_line in enumerate(text_lines):
             current_start_char = last_end_char
             current_line_text_length = len(self.fix_text(text_line))
-            is_new_speaker_start = text_line.endswith(":\n") and text_line.replace(":", "").replace("\n",
-                                                                                                    "") not in NOT_SPEAKER_START_PHRASES
+            is_new_speaker_start = (text_line.endswith(":\n") or text_line.endswith(":>\n" )) and text_line.replace(":", "") \
+                .replace("<", "").replace(">", "").replace("\n", "") not in NOT_SPEAKER_START_PHRASES
             if is_new_speaker_start:
                 if first_speaker_in_text:
                     first_speaker_in_text = False
@@ -135,8 +141,11 @@ class SpeakerLevelDatasetCreator(GenericDatasetCreator):
             label = annotation_row[LABEL_COLUMN]
             label_start_char = annotation_row[LABEL_START_CHAR_COLUMN]
             label_end_char = annotation_row[LABEL_END_CHAR_COLUMN]
-            assert speaker_name_start_char <= label_start_char
-            assert speaker_end_char >= label_end_char
+            if speaker_end_char < label_end_char or speaker_name_start_char > label_start_char:
+                print("\n\nLabel is not in the speaker's text, skipping!!!")
+                print(f"speaker_end_char: {speaker_end_char}, label_end_char: {label_end_char}, ")
+                print(f"speaker_name_start_char: {speaker_name_start_char}, label_start_char: {label_start_char}, ")
+                continue
             annotated_row = AnnotationIncludingSpeakerInfo(speaker_name_start_char=speaker_name_start_char,
                                                            speaker_text_start_char=speaker_text_start_char,
                                                            speaker_text_end_char=speaker_end_char,
@@ -202,7 +211,7 @@ class SpeakerLevelDatasetCreator(GenericDatasetCreator):
             protocol_number = extract_protocol_number_from_text(txt_content)
         except Exception as exception:
             print(
-                f"Using None since couldnt find protocol number for protocol dir: {final_df[FILE_COLUMN].iloc[0]}, committee is {committee}, exception is: {exception}")
+                f"Using None in protocol number since couldnt find protocol number for protocol dir: {final_df[FILE_COLUMN].iloc[0]}, committee is {committee}, exception is: {exception}")
             protocol_number = None
         final_df[PROTOCOL_NUMBER_COLUMN] = protocol_number
         final_df = final_df.sort_values(by=[SPEAKER_NAME_START_CHAR_COLUMN, LABEL_START_CHAR_COLUMN])
